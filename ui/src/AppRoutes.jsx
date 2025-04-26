@@ -3,6 +3,7 @@ import HomePage from "./containers/HomePage";
 import { Routes, Route } from "react-router-dom";
 import PageThree from "./containers/PageThree";
 import PageFour from "./containers/PageFour";
+import LabOne from "./containers/LabOne";
 
 function AppRoutes(props) {
   return (
@@ -14,6 +15,7 @@ function AppRoutes(props) {
       <Route path="/page-three/:id" element={<PageThree />} />
 
       <Route path="/page-four" element={<PageFour />} />
+      <Route path="/lab-one" element={<LabOne />} />
       {/* localhost:xxxx/page-four?id=3 */}
 
       {/* special route to handle if none of the above match */}
