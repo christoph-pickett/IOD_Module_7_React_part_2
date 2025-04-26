@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -7,8 +7,10 @@ import {
   FormControl,
   Select,
   TextField,
+  Skeleton,
 } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
+import { useQuery } from "../hooks/useQuery";
 
 const currencies = [
   { name: "USD", symbol: "$" },
@@ -27,20 +29,36 @@ const BitcoinRates = () => {
   const [currency, setCurrency] = useState(
     optionalCur ? optionalCur : currencies[0].name
   );
+
+  const [data, isLoading] = useQuery(
+    `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`
+  );
+
   const [currencySymbol, setCurrencySymbol] = useState(currencies[0].symbol);
   const [result, setResult] = useState();
   const [amount, setAmount] = useState(1);
 
   useEffect(() => {
-    fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`
-    )
-      .then((res) => res.json())
-      .then((res) => {
-        console.log("res", res);
-        setResult(res.bitcoin[currency.toLowerCase()]);
-      });
-  }, [currency]);
+    const getCurrencyFromQueryData = (data, key) => {
+      if (data && key) {
+        setResult(data.bitcoin[key]);
+      }
+    };
+
+    getCurrencyFromQueryData(data, currency.toLowerCase());
+    console.log("data", data);
+  }, [data]);
+
+  // useEffect(() => {
+  //   fetch(
+  //     `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`
+  //   )
+  //     .then((res) => res.json())
+  //     .then((res) => {
+  //       console.log("res", res);
+  //       setResult(res.bitcoin[currency.toLowerCase()]);
+  //     });
+  // }, [currency]);
 
   // fetch URL: https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}
   const handleCurrencySelection = (e) => {
@@ -61,6 +79,17 @@ const BitcoinRates = () => {
   const calculateBitcoinPrice = (pricePerOne, amount) => {
     console.log(pricePerOne, amount);
     return pricePerOne * amount;
+  };
+
+  const resultDisplayHandler = () => {
+    return isLoading ? (
+      <Skeleton width={"400px"} height={"100px"} />
+    ) : (
+      <Typography>
+        {amount} x Bitcoin = {currencySymbol}{" "}
+        {calculateBitcoinPrice(result, amount)}
+      </Typography>
+    );
   };
 
   return (
@@ -87,10 +116,7 @@ const BitcoinRates = () => {
             {currencyOptions}
           </Select>
         </FormControl>
-        <Typography>
-          {amount} x Bitcoin = {currencySymbol}{" "}
-          {calculateBitcoinPrice(result, amount)}
-        </Typography>
+        {resultDisplayHandler()}
       </Box>
     </>
   );
